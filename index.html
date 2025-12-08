@@ -6,39 +6,63 @@
     <title>Rapport Visite</title>
     <style>
         /* --- STYLES GENERAUX --- */
-        :root { --blue: #1D3051; --green: #009A4D; }
+        :root { 
+            --blue: #1D3051; 
+            --green: #009A4D; 
+            /* Les dimensions sont définies via JS, valeurs de fallback ici */
+            --pdf-logo-w: 2.78cm;
+            --pdf-logo-h: 1.36cm;
+            --pdf-photo-h: 220px;
+        }
         body { font-family: -apple-system, Helvetica, Arial, sans-serif; background: #f2f2f7; margin: 0; padding: 0; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        /* --- STYLES ECRAN DE SAISIE --- */
+        /* UTILITAIRE */
+        .hidden { display: none !important; }
+
+        /* --- INTERFACE DE SAISIE --- */
         #section-formulaire { padding: 15px; padding-bottom: 120px; display: block; max-width: 800px; margin: 0 auto; }
-        .header { background: var(--blue); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2em; border-radius: 10px; margin-bottom: 20px; }
+        
+        /* BANDEAU ECRAN */
+        .header { 
+            background: var(--blue); color: white; padding: 15px; 
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 0 0 10px 10px; margin-bottom: 20px; position: relative;
+            min-height: 70px;
+        }
+        
+        .logo-img {
+            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            width: 80px; height: auto; object-fit: contain;
+        }
+        
         .box { background: white; padding: 20px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         h2.form-h2 { color: var(--blue); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; font-size: 1.1em; }
         
-        /* CHAMPS & CHOIX */
+        /* CHAMPS */
         label.titre-champ { display: block; font-weight: bold; margin-top: 15px; margin-bottom: 5px; color: #333; }
-        input[type="text"], input[type="date"], select { width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; -webkit-appearance: none; }
+        input[type="text"], input[type="date"], select { 
+            width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; 
+            font-size: 16px; background: white; -webkit-appearance: none; 
+        }
 
-        /* CORRECTION CHOIX : GRANDE ZONE CLIQUABLE */
+        /* CHOIX */
         .choix-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
-        .btn-choix {
-            background: #f0f2f5; border: 1px solid #ccc; padding: 15px; border-radius: 8px; /* PLUS DE PADDING */
-            display: flex; align-items: center; gap: 10px; flex: 1 1 40%; font-size: 15px; cursor: pointer;
+        .label-choix {
+            background: #f0f2f5; border: 1px solid #ccc; padding: 12px; border-radius: 8px; 
+            display: flex; align-items: center; gap: 10px; flex: 1 1 45%; font-size: 15px;
         }
-        /* CORRECTION CSS : On retire les styles de taille qui bloquaient le clic */
-        .btn-choix input[type="radio"], .btn-choix input[type="checkbox"] { 
-            width: auto; height: auto; margin: 0; /* Taille native */
-            transform: scale(1.3); /* Laisse le scale, mais retire les dimensions fixes */
-        }
+        .label-choix input { width: 25px; height: 25px; margin: 0; accent-color: var(--green); }
 
         /* PHOTOS */
         .photo-btn {
             display: block; width: 100%; background: #e9e9e9; color: #333; padding: 15px;
             text-align: center; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer; border: 2px dashed #ccc;
         }
+        .hidden-input { opacity: 0; position: absolute; z-index: -1; width: 1px; height: 1px; }
+
         .preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-        .thumb { width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
+        .thumb { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
 
         /* BOUTON GENERER */
         .btn-generate {
@@ -46,19 +70,26 @@
             font-size: 18px; font-weight: bold; border-radius: 12px; margin-top: 20px; cursor: pointer;
         }
 
-        /* --- STYLES RAPPORT PDF --- */
-        #section-rapport { display: none; background: white; min-height: 100vh; padding: 20px; padding-bottom: 120px; max-width: 800px; margin: 0 auto; }
+        /* --- ZONE RAPPORT FINAL (PDF) --- */
+        #section-rapport { background: white; min-height: 100vh; padding: 20px; padding-bottom: 120px; }
         
-        .p-header { color: var(--blue); font-size: 22px; text-align: center; border-bottom: 2px solid var(--blue); margin-bottom: 20px; font-weight: bold; }
+        .p-header-container { display: flex; align-items: center; border-bottom: 2px solid var(--blue); margin-bottom: 20px; padding-bottom: 10px; }
+        
+        /* Utilisation des variables CSS pour les dimensions */
+        .p-logo { width: var(--pdf-logo-w); height: var(--pdf-logo-h); object-fit: contain; margin-right: 20px; }
+        
+        .p-title { color: var(--blue); font-size: 22px; font-weight: bold; flex-grow: 1; text-align: center; }
         .p-h2 { color: #333; font-size: 16px; border-bottom: 1px solid #ccc; margin-top: 25px; margin-bottom: 10px; font-weight: bold; }
         
         table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
         th, td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 12px; vertical-align: top; }
         th { background-color: #f0f0f0; width: 35%; }
 
-        /* Correction Photos (2 par ligne) */
-        .p-grid { display: block; text-align: center; margin-top: 10px; }
-        .p-img { width: 48%; height: 200px; object-fit: contain; display: inline-block; margin: 0 1% 10px 0; border: 1px solid #eee; }
+        /* Photos PDF 2x2 */
+        .p-grid { display: block; text-align: center; margin-top: 10px; font-size: 0; }
+        
+        /* Utilisation de la variable hauteur photo */
+        .p-img { width: 48%; height: var(--pdf-photo-h); object-fit: contain; display: inline-block; margin: 0 1% 10px 0; border: 1px solid #eee; vertical-align: top; }
 
         /* BARRE D'ACTION */
         .action-bar {
@@ -69,71 +100,79 @@
         .btn-back { flex: 1; background: #666; color: white; padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-size: 16px; }
         .btn-print { flex: 2; background: var(--green); color: white; padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; }
 
-        /* IMPRESSION */
         @media print {
-            #section-formulaire, .action-bar, .header { display: none !important; }
+            #section-formulaire, .action-bar { display: none !important; }
             #section-rapport { display: block !important; padding: 0; margin: 0; }
             body { background: white; padding: 0; margin: 0; }
+            .p-img { break-inside: avoid; }
         }
     </style>
 </head>
 <body>
 
 <div id="section-formulaire">
-    <div class="header">Générateur de Rapport</div>
+    <div class="header">
+        <img id="app-logo" src="" class="logo-img" alt="Logo" onerror="this.style.display='none'">
+        <span id="app-title">Rapport Visite</span>
+    </div>
 
     <div class="box">
         <h2 class="form-h2">1. Identification</h2>
-        <label class="titre-champ">N° Affaire</label> <input type="text" id="i_aff" value="REV0_2181625.1">
+        <label class="titre-champ">N° Affaire</label> <input type="text" id="i_aff">
         <label class="titre-champ">Date</label> <input type="date" id="i_date">
-        <label class="titre-champ">Intervenant</label> <input type="text" id="i_int" value="APAVE SUD EST">
+        
+        <label class="titre-champ">Intervenant</label> 
+        <!-- Les options sont générées par JS -->
+        <select id="i_int"></select>
     </div>
 
     <div class="box">
         <h2 class="form-h2">2. Ouvrage</h2>
         <label class="titre-champ">Type</label> 
-        <select id="i_type"><option>MUR</option><option>PONT</option><option>BUSE</option></select>
-        <label class="titre-champ">Localisation</label> <input type="text" id="i_loc" value="Stand de Tir des Trois Lucs">
-        <label class="titre-champ">Identifiant</label> <input type="text" id="i_id" value="P0227">
-        <label class="titre-champ">GPS</label> <input type="text" id="i_gps" value="Lat: 43.435, Lon: 6.365">
+        <!-- Les options sont générées par JS -->
+        <select id="i_type"></select>
+        
+        <label class="titre-champ">Localisation</label> <input type="text" id="i_loc">
+        <label class="titre-champ">Identifiant</label> <input type="text" id="i_id">
+        <label class="titre-champ">GPS</label> <input type="text" id="i_gps">
     </div>
 
     <div class="box">
         <h2 class="form-h2">3. Photos Couverture</h2>
         <label for="file1" class="photo-btn">📷 Ajouter Photo</label>
-        <input type="file" id="file1" accept="image/*" multiple style="display:none" onchange="prev(this, 'grid1')">
+        <input type="file" id="file1" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid1')">
         <div id="grid1" class="preview-grid"></div>
     </div>
 
     <div class="box">
         <h2 class="form-h2">4. Visite</h2>
-        <label class="titre-champ">Commentaire Plan</label> <input type="text" id="i_plan" value="Image de P0227 sur carte">
         
+        <label class="titre-champ">Plan (Photos)</label>
+        <label for="file3" class="photo-btn">📷 Ajouter Photo Plan</label>
+        <input type="file" id="file3" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid3')">
+        <div id="grid3" class="preview-grid"></div>
+
         <label class="titre-champ">Débroussaillage</label> 
         <div class="choix-container">
-            <label class="btn-choix"><input type="radio" name="deb" value="Oui" checked> Oui</label>
-            <label class="btn-choix"><input type="radio" name="deb" value="Non"> Non</label>
+            <label class="label-choix"><input type="radio" name="deb" value="Oui" checked> Oui</label>
+            <label class="label-choix"><input type="radio" name="deb" value="Non"> Non</label>
         </div>
 
         <label class="titre-champ">Signalisation</label> 
         <div class="choix-container">
-            <label class="btn-choix"><input type="radio" name="sig" value="Oui"> Oui</label>
-            <label class="btn-choix"><input type="radio" name="sig" value="Non" checked> Non</label>
+            <label class="label-choix"><input type="radio" name="sig" value="Oui"> Oui</label>
+            <label class="label-choix"><input type="radio" name="sig" value="Non" checked> Non</label>
         </div>
 
         <label class="titre-champ">Accès</label>
-        <div class="choix-container" id="i_acc">
-            <label class="btn-choix"><input type="checkbox" value="Nacelle négative" checked> Nacelle Nég.</label>
-            <label class="btn-choix"><input type="checkbox" value="Nacelle positive"> Nacelle Pos.</label>
-            <label class="btn-choix"><input type="checkbox" value="Cordistes"> Cordistes</label>
-            <label class="btn-choix"><input type="checkbox" value="À pieds"> À pieds</label>
-        </div>
+        <!-- Les cases à cocher sont générées par JS -->
+        <div class="choix-container" id="i_acc_container"></div>
     </div>
 
     <div class="box">
         <h2 class="form-h2">5. Photos Abords</h2>
         <label for="file2" class="photo-btn">📷 Ajouter Photo</label>
-        <input type="file" id="file2" accept="image/*" multiple style="display:none" onchange="prev(this, 'grid2')">
+        <input type="file" id="file2" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid2')">
         <div id="grid2" class="preview-grid"></div>
     </div>
 
@@ -146,16 +185,107 @@
 
 <div id="action-bar" class="action-bar hidden">
     <button class="btn-back" onclick="modeEdition()">✏️ Modifier</button>
-    <button class="btn-print" onclick="lancerImpression()">💾 IMPRIMER</button>
+    <button class="btn-print" onclick="window.print()">💾 IMPRIMER</button>
 </div>
 
 <script>
-    // Init Date
-    try { document.getElementById('i_date').valueAsDate = new Date(); } catch(e){}
+    // ==========================================
+    // CONFIGURATION GENERALE
+    // Modifiez ici les valeurs pour adapter l'application
+    // ==========================================
+    const CONFIG = {
+        // Textes et Liens
+        titreApplication: "Rapport Visite",
+        logoUrl: "https://img.batiweb.com/repo-images/supplier/5820813/apave-logo.webp",
 
-    var images = { 'file1': [], 'file2': [] };
+        // Valeurs par défaut des champs
+        defaults: {
+            affaire: "REV0_2181625.1",
+            localisation: "Stand de Tir des Trois Lucs",
+            identifiant: "P0227",
+            gps: "Lat: 43.435, Lon: 6.365"
+        },
 
-    // Aperçu photos FORMULAIRE
+        // Listes déroulantes
+        intervenants: [
+            "Laurent SIALELLI",
+            "Caroline GAZULLA",
+            "David YVON",
+            "Jeremy CANDAELLE"
+        ],
+        typesOuvrage: [
+            "MUR", "PONT", "BUSE", "TUNNEL"
+        ],
+
+        // Liste des accès (Cases à cocher)
+        moyensAcces: [
+            { label: "Nacelle Nég.", value: "Nacelle négative", checked: true },
+            { label: "Nacelle Pos.", value: "Nacelle positive", checked: false },
+            { label: "Cordistes", value: "Cordistes", checked: false },
+            { label: "À pieds", value: "À pieds", checked: false },
+            { label: "Drone", value: "Drone", checked: false }
+        ],
+
+        // Dimensions pour le PDF/Impression
+        dimensions: {
+            logoPdfWidth: "2.78cm",
+            logoPdfHeight: "1.36cm",
+            photoPdfHeight: "250px"
+        }
+    };
+
+    // ==========================================
+    // INITIALISATION
+    // ==========================================
+    window.onload = function() {
+        // 1. Initialiser le titre et le logo de l'app
+        document.getElementById('app-title').textContent = CONFIG.titreApplication;
+        document.getElementById('app-logo').src = CONFIG.logoUrl;
+        document.title = CONFIG.titreApplication;
+
+        // 2. Initialiser les valeurs par défaut
+        try { document.getElementById('i_date').valueAsDate = new Date(); } catch(e){}
+        document.getElementById('i_aff').value = CONFIG.defaults.affaire;
+        document.getElementById('i_loc').value = CONFIG.defaults.localisation;
+        document.getElementById('i_id').value = CONFIG.defaults.identifiant;
+        document.getElementById('i_gps').value = CONFIG.defaults.gps;
+
+        // 3. Remplir les listes déroulantes (Selects)
+        remplirSelect('i_int', CONFIG.intervenants);
+        remplirSelect('i_type', CONFIG.typesOuvrage);
+
+        // 4. Générer les cases à cocher pour l'accès
+        const accContainer = document.getElementById('i_acc_container');
+        CONFIG.moyensAcces.forEach(opt => {
+            const label = document.createElement('label');
+            label.className = 'label-choix';
+            label.innerHTML = `<input type="checkbox" value="${opt.value}" ${opt.checked ? 'checked' : ''}> ${opt.label}`;
+            accContainer.appendChild(label);
+        });
+
+        // 5. Appliquer les dimensions CSS dynamiquement
+        const root = document.documentElement;
+        root.style.setProperty('--pdf-logo-w', CONFIG.dimensions.logoPdfWidth);
+        root.style.setProperty('--pdf-logo-h', CONFIG.dimensions.logoPdfHeight);
+        root.style.setProperty('--pdf-photo-h', CONFIG.dimensions.photoPdfHeight);
+    };
+
+    function remplirSelect(id, optionsArray) {
+        const sel = document.getElementById(id);
+        optionsArray.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt;
+            el.textContent = opt;
+            sel.appendChild(el);
+        });
+    }
+
+    // ==========================================
+    // LOGIQUE METIER
+    // ==========================================
+    var images = { 'file1': [], 'file2': [], 'file3': [] };
+
+    // Aperçu photos
     function prev(input, gridId) {
         var grid = document.getElementById(gridId);
         if (input.files) {
@@ -179,15 +309,19 @@
         return el ? el.value : '';
     }
     function getCheck() {
-        var c = document.querySelectorAll('#i_acc input:checked');
+        // On récupère les inputs dans le container généré
+        var c = document.querySelectorAll('#i_acc_container input:checked');
         var v = []; for(var i=0; i<c.length; i++) v.push(c[i].value);
         return v.join(', ');
     }
 
-    // --- FONCTION 1 : GÉNÉRER LE HTML (Aperçu) ---
+    // --- GÉNÉRER LE RAPPORT ---
     function genererRapport() {
         var html = `
-            <div class="p-header">Pré visite des ouvrages</div>
+            <div class="p-header-container">
+                <img src="${CONFIG.logoUrl}" class="p-logo">
+                <div class="p-title">Pré visite des ouvrages</div>
+            </div>
             
             <div class="p-h2">1. Identification</div>
             <table>
@@ -211,10 +345,15 @@
 
             <div style="page-break-before: always;"></div>
 
-            <div class="p-header">Localisation & Visite</div>
+            <div class="p-header-container">
+                <img src="${CONFIG.logoUrl}" class="p-logo">
+                <div class="p-title">Localisation & Visite</div>
+            </div>
 
             <div class="p-h2">3. Localisation</div>
-            <table><tr><th>Plan</th><td>${getVal('i_plan')}</td></tr></table>
+            <div class="p-grid">
+                ${images['file3'].map(src => `<img src="${src}" class="p-img">`).join('')}
+            </div>
 
             <div class="p-h2">4. Préparation</div>
             <table>
@@ -231,28 +370,18 @@
 
         document.getElementById('rapport-content').innerHTML = html;
         
-        // Bascule d'écran
         document.getElementById('section-formulaire').classList.add('hidden');
         document.getElementById('section-rapport').classList.remove('hidden');
         document.getElementById('action-bar').classList.remove('hidden');
         
         window.scrollTo(0,0);
-        
-        // Renommage (Titre pour le PDF)
         document.title = getVal('i_id') + " - " + getVal('i_type') + " - " + getVal('i_date');
     }
 
-    // --- FONCTION 2 : RETOUR AU FORMULAIRE ---
     function modeEdition() {
         document.getElementById('section-rapport').classList.add('hidden');
         document.getElementById('action-bar').classList.add('hidden');
         document.getElementById('section-formulaire').classList.remove('hidden');
-    }
-
-    // --- FONCTION 3 : IMPRESSION ---
-    function lancerImpression() {
-        // Lancement direct (méthode stable)
-        window.print();
     }
 </script>
 
