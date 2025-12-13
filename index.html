@@ -12,7 +12,7 @@
             /* Les dimensions sont définies via JS, valeurs de fallback ici */
             --pdf-logo-w: 2.78cm;
             --pdf-logo-h: 1.36cm;
-            --pdf-photo-h: 220px;
+            --pdf-photo-h: 250px; /* Taille PDF augmentée pour les grilles 2x2 */
         }
         body { font-family: -apple-system, Helvetica, Arial, sans-serif; background: #f2f2f7; margin: 0; padding: 0; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -39,9 +39,9 @@
         .box { background: white; padding: 20px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         h2.form-h2 { color: var(--blue); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; font-size: 1.1em; }
         
-        /* CHAMPS */
+        /* CHAMPS - Ajout de 'textarea' ici */
         label.titre-champ { display: block; font-weight: bold; margin-top: 15px; margin-bottom: 5px; color: #333; }
-        input[type="text"], input[type="date"], select { 
+        input[type="text"], input[type="date"], select, textarea { 
             width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; 
             font-size: 16px; background: white; -webkit-appearance: none; 
         }
@@ -62,12 +62,40 @@
         .hidden-input { opacity: 0; position: absolute; z-index: -1; width: 1px; height: 1px; }
 
         .preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+        /* Aperçu plus petit pour les photos de commentaires */
+        .comment-item .preview-grid { grid-template-columns: repeat(4, 1fr); margin-top: 5px;} 
         .thumb { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
 
         /* BOUTON GENERER */
         .btn-generate {
             display: block; width: 100%; background: var(--blue); color: white; border: none; padding: 20px;
             font-size: 18px; font-weight: bold; border-radius: 12px; margin-top: 20px; cursor: pointer;
+        }
+
+        /* --- STYLES COMMENTAIRES MULTIPLES --- */
+        .comment-item {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+        .comment-item:first-child {
+            border-top: none;
+            margin-top: 0;
+            padding-top: 0;
+        }
+        .comment-item .titre-champ {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .comment-item button {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 0.9em;
+            cursor: pointer;
+            padding: 5px 0;
         }
 
         /* --- ZONE RAPPORT FINAL (PDF) --- */
@@ -89,22 +117,16 @@
         .p-grid { display: block; text-align: center; margin-top: 10px; font-size: 0; }
         
         /* Utilisation de la variable hauteur photo */
-        .p-img { width: 48%; height: var(--pdf-photo-h); object-fit: contain; display: inline-block; margin: 0 1% 10px 0; border: 1px solid #eee; vertical-align: top; }
-
-        /* BARRE D'ACTION */
-        .action-bar {
-            position: fixed; bottom: 0; left: 0; right: 0; background: white;
-            padding: 15px; border-top: 1px solid #ccc; display: flex; gap: 10px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 9999;
-        }
-        .btn-back { flex: 1; background: #666; color: white; padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-size: 16px; }
-        .btn-print { flex: 2; background: var(--green); color: white; padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; }
-
-        @media print {
-            #section-formulaire, .action-bar { display: none !important; }
-            #section-rapport { display: block !important; padding: 0; margin: 0; }
-            body { background: white; padding: 0; margin: 0; }
-            .p-img { break-inside: avoid; }
+        /* Dans le rapport, les photos sont affichées dans la colonne TD, leur largeur est relative au TD */
+        .p-img { 
+            width: 48%; /* 2 photos par ligne dans le TD */
+            height: var(--pdf-photo-h); 
+            object-fit: contain; 
+            display: inline-block; 
+            margin: 0 1% 10px 0; 
+            border: 1px solid #eee; 
+            vertical-align: top; 
+            box-sizing: border-box; /* Inclusion des marges dans la largeur */
         }
     </style>
 </head>
@@ -140,6 +162,7 @@
     <div class="box">
         <h2 class="form-h2">3. Photos Couverture</h2>
         <label for="file1" class="photo-btn">📷 Ajouter Photo</label>
+        <!-- prev() est mis à jour pour ajouter au lieu de remplacer -->
         <input type="file" id="file1" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid1')">
         <div id="grid1" class="preview-grid"></div>
     </div>
@@ -149,6 +172,7 @@
         
         <label class="titre-champ">Plan (Photos)</label>
         <label for="file3" class="photo-btn">📷 Ajouter Photo Plan</label>
+        <!-- prev() est mis à jour pour ajouter au lieu de remplacer -->
         <input type="file" id="file3" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid3')">
         <div id="grid3" class="preview-grid"></div>
 
@@ -172,9 +196,20 @@
     <div class="box">
         <h2 class="form-h2">5. Photos Abords</h2>
         <label for="file2" class="photo-btn">📷 Ajouter Photo</label>
+        <!-- prev() est mis à jour pour ajouter au lieu de remplacer -->
         <input type="file" id="file2" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid2')">
         <div id="grid2" class="preview-grid"></div>
     </div>
+    
+    <!-- Bloc 6. Commentaires dynamiques -->
+    <div class="box">
+        <h2 class="form-h2">6. Commentaires</h2>
+        <div id="comment_fields_container">
+            <!-- Les champs de commentaires sont insérés ici par JS -->
+        </div>
+        <button type="button" class="photo-btn" onclick="addCommentField()">+ Ajouter un Commentaire</button>
+    </div>
+    <!-- Fin Bloc 6. Commentaires dynamiques -->
 
     <button class="btn-generate" onclick="genererRapport()">✅ GÉNÉRER L'APERÇU</button>
 </div>
@@ -191,7 +226,6 @@
 <script>
     // ==========================================
     // CONFIGURATION GENERALE
-    // Modifiez ici les valeurs pour adapter l'application
     // ==========================================
     const CONFIG = {
         // Textes et Liens
@@ -200,7 +234,7 @@
 
         // Valeurs par défaut des champs
         defaults: {
-            affaire: "REV0_2181625.1",
+            affaire: "REV0_1111111",
             localisation: "Stand de Tir des Trois Lucs",
             identifiant: "P0227",
             gps: "Lat: 43.435, Lon: 6.365"
@@ -214,7 +248,7 @@
             "Jeremy CANDAELLE"
         ],
         typesOuvrage: [
-            "MUR", "PONT", "BUSE", "TUNNEL"
+            "MUR", "PONT", "BUSE", "TUNNEL", "DALLOT"
         ],
 
         // Liste des accès (Cases à cocher)
@@ -225,6 +259,9 @@
             { label: "À pieds", value: "À pieds", checked: false },
             { label: "Drone", value: "Drone", checked: false }
         ],
+        
+        // Commentaires initiaux
+        initialComments: [], 
 
         // Dimensions pour le PDF/Impression
         dimensions: {
@@ -235,43 +272,244 @@
     };
 
     // ==========================================
+    // VARIABLES GLOBALES (Stockage des données)
+    // ==========================================
+    let commentCounter = 0; // Compteur pour générer les IDs uniques
+
+    // Stockage des images des sections fixes (3, 4, 5)
+    // Format: { 'file1': [base64_url, ...], ... }
+    var images = { 'file1': [], 'file2': [], 'file3': [] }; 
+    
+    // Stockage des images des commentaires dynamiques (Section 6)
+    // Format: { 'i_comment_1': [base64_url, ...], 'i_comment_2': [...] }
+    var commentImages = {}; 
+
+    // ==========================================
+    // LOGIQUE COMMENTAIRES DYNAMIQUES
+    // ==========================================
+
+    function updateCommentPreviewGrid(gridId, images) {
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        grid.innerHTML = '';
+        images.forEach(src => {
+            var img = document.createElement('img');
+            img.src = src; img.className = 'thumb';
+            grid.appendChild(img);
+        });
+    }
+
+    function addCommentField(initialText = '', initialImages = []) {
+        commentCounter++;
+        const container = document.getElementById('comment_fields_container');
+        if (!container) return;
+
+        const commentId = `i_comment_${commentCounter}`;
+        const photoInputId = `comment_img_input_${commentCounter}`;
+        const photoGridId = `comment_grid_${commentCounter}`;
+
+        // Initialiser/Remplacer l'entrée dans le stockage d'images des commentaires
+        commentImages[commentId] = initialImages;
+
+        const div = document.createElement('div');
+        div.id = `comment_item_${commentCounter}`;
+        div.className = 'comment-item';
+        div.innerHTML = `
+            <label class="titre-champ">
+                <span>Commentaire ${commentCounter}</span>
+                <button type="button" onclick="removeCommentField('${div.id}')">Supprimer</button>
+            </label>
+            <textarea id="${commentId}" rows="3" placeholder="Saisissez votre commentaire ici...">${initialText}</textarea>
+            
+            <label for="${photoInputId}" class="photo-btn" style="margin-top: 10px; border: 1px dashed #ccc; background: #fafafa; color: var(--blue); font-size: 0.9em;">+ Ajouter Photo(s) (Max. 4)</label>
+            <input type="file" id="${photoInputId}" class="hidden-input" accept="image/*" multiple onchange="prevComment(this, '${photoGridId}', '${commentId}')">
+            <div id="${photoGridId}" class="preview-grid"></div>
+        `;
+        container.appendChild(div);
+
+        // Remplissage de la grille si des images initiales sont fournies
+        updateCommentPreviewGrid(photoGridId, initialImages);
+    }
+
+    function removeCommentField(itemId) {
+        const item = document.getElementById(itemId);
+        if (item) {
+            // Supprimer l'entrée du stockage d'images avant de supprimer l'élément DOM
+            const textarea = item.querySelector('textarea');
+            if (textarea && commentImages[textarea.id]) {
+                delete commentImages[textarea.id];
+            }
+            item.remove();
+            updateCommentNumbers();
+        }
+    }
+
+    function updateCommentNumbers() {
+        const fields = document.querySelectorAll('#comment_fields_container .comment-item');
+        let newCounter = 0;
+        const oldCommentImages = { ...commentImages }; // Snapshot old images
+        commentImages = {}; // Réinitialiser le stockage d'images des commentaires
+
+        fields.forEach((field, index) => {
+            const number = index + 1;
+            newCounter = number;
+            
+            // Nouveau IDs
+            const newCommentId = `i_comment_${number}`;
+            const newPhotoInputId = `comment_img_input_${number}`;
+            const newPhotoGridId = `comment_grid_${number}`;
+            const newFieldId = `comment_item_${number}`;
+
+            const textarea = field.querySelector('textarea');
+            if (textarea) {
+                const oldCommentId = textarea.id; 
+                textarea.id = newCommentId;
+                
+                // Transférer les images vers la nouvelle clé de stockage
+                if (oldCommentImages[oldCommentId]) {
+                    commentImages[newCommentId] = oldCommentImages[oldCommentId];
+                }
+            }
+            
+            // Mise à jour des IDs DOM et des gestionnaires d'événements
+            field.id = newFieldId;
+            const photoInput = field.querySelector('input[type="file"]');
+            const photoBtn = field.querySelector('label[for^="comment_img_input"]');
+            const photoGrid = field.querySelector('.preview-grid');
+            
+            if(photoInput) {
+                photoInput.id = newPhotoInputId;
+                photoInput.setAttribute('onchange', `prevComment(this, '${newPhotoGridId}', '${newCommentId}')`);
+            }
+            if(photoBtn) {
+                photoBtn.setAttribute('for', newPhotoInputId);
+            }
+            if(photoGrid) {
+                photoGrid.id = newPhotoGridId;
+                // Re-remplir la grille avec les données d'image correctes
+                updateCommentPreviewGrid(newPhotoGridId, commentImages[newCommentId] || []);
+            }
+
+            // Mise à jour des labels et boutons
+            const labelSpan = field.querySelector('.titre-champ span');
+            if (labelSpan) {
+                 labelSpan.textContent = `Commentaire ${number}`;
+            }
+            const removeBtn = field.querySelector('button');
+            if (removeBtn) {
+                removeBtn.setAttribute('onclick', `removeCommentField('${newFieldId}')`);
+            }
+        });
+        commentCounter = newCounter;
+    }
+
+    // Gestionnaire de prévisualisation pour les images de commentaires (maintenant en mode AJOUT)
+    function prevComment(input, gridId, commentId) {
+        
+        // 1. Assurez-vous que le tableau existe pour ce commentaire
+        if (!commentImages[commentId]) {
+            commentImages[commentId] = [];
+        }
+
+        if (input.files.length === 0) return;
+
+        const files = Array.from(input.files); 
+        let filesProcessed = 0;
+        
+        files.forEach(f => {
+            // 2. Vérifier si on a atteint la limite de 4 images
+            if (commentImages[commentId].length >= 4) {
+                console.warn(`Limite de 4 images atteinte pour le commentaire ${commentId}.`);
+                return; 
+            }
+            
+            var reader = new FileReader();
+            reader.onload = (e) => {
+                // Ajouter l'image si la limite n'est pas atteinte
+                if (commentImages[commentId].length < 4) {
+                    commentImages[commentId].push(e.target.result); 
+                }
+
+                filesProcessed++;
+                
+                // 3. Mettre à jour la grille UNIQUEMENT après que TOUTES les lectures asynchrones sont terminées
+                if (filesProcessed === files.length) {
+                    updateCommentPreviewGrid(gridId, commentImages[commentId]);
+                    // Important: Réinitialiser la valeur de l'input pour pouvoir sélectionner les MÊMES fichiers à nouveau
+                    input.value = ''; 
+                }
+            };
+            reader.readAsDataURL(f);
+        });
+    }
+
+
+    // ==========================================
     // INITIALISATION
     // ==========================================
-    window.onload = function() {
-        // 1. Initialiser le titre et le logo de l'app
-        document.getElementById('app-title').textContent = CONFIG.titreApplication;
-        document.getElementById('app-logo').src = CONFIG.logoUrl;
+    
+    // Fonction principale d'initialisation
+    function initApp() {
+        console.log("Initialisation de l'application...");
+        
+        // 1. Initialiser le titre et le logo
+        const appTitle = document.getElementById('app-title');
+        const appLogo = document.getElementById('app-logo');
+        
+        if(appTitle) appTitle.textContent = CONFIG.titreApplication;
+        if(appLogo) appLogo.src = CONFIG.logoUrl;
         document.title = CONFIG.titreApplication;
 
-        // 2. Initialiser les valeurs par défaut
-        try { document.getElementById('i_date').valueAsDate = new Date(); } catch(e){}
-        document.getElementById('i_aff').value = CONFIG.defaults.affaire;
-        document.getElementById('i_loc').value = CONFIG.defaults.localisation;
-        document.getElementById('i_id').value = CONFIG.defaults.identifiant;
-        document.getElementById('i_gps').value = CONFIG.defaults.gps;
+        // 2. Initialiser les valeurs par défaut (sauf les commentaires)
+        try { 
+            const dateInput = document.getElementById('i_date');
+            if(dateInput && !dateInput.value) dateInput.valueAsDate = new Date(); 
+        } catch(e) { console.warn("Erreur date:", e); }
+        
+        setValIfExist('i_aff', CONFIG.defaults.affaire);
+        setValIfExist('i_loc', CONFIG.defaults.localisation);
+        setValIfExist('i_id', CONFIG.defaults.identifiant);
+        setValIfExist('i_gps', CONFIG.defaults.gps);
 
-        // 3. Remplir les listes déroulantes (Selects)
+        // 3. Remplir les listes déroulantes
         remplirSelect('i_int', CONFIG.intervenants);
         remplirSelect('i_type', CONFIG.typesOuvrage);
 
         // 4. Générer les cases à cocher pour l'accès
         const accContainer = document.getElementById('i_acc_container');
-        CONFIG.moyensAcces.forEach(opt => {
-            const label = document.createElement('label');
-            label.className = 'label-choix';
-            label.innerHTML = `<input type="checkbox" value="${opt.value}" ${opt.checked ? 'checked' : ''}> ${opt.label}`;
-            accContainer.appendChild(label);
-        });
+        if (accContainer && accContainer.innerHTML === "") {
+            CONFIG.moyensAcces.forEach(opt => {
+                const label = document.createElement('label');
+                label.className = 'label-choix';
+                label.innerHTML = `<input type="checkbox" value="${opt.value}" ${opt.checked ? 'checked' : ''}> ${opt.label}`;
+                accContainer.appendChild(label);
+            });
+        }
+        
+        // 5. Initialiser les champs de commentaires par défaut
+        if (CONFIG.initialComments.length > 0) {
+            CONFIG.initialComments.forEach(comment => addCommentField(comment.text, comment.images));
+        } else {
+             addCommentField(); // Au moins un champ vide
+        }
 
-        // 5. Appliquer les dimensions CSS dynamiquement
+        // 6. Appliquer les dimensions CSS dynamiquement
         const root = document.documentElement;
         root.style.setProperty('--pdf-logo-w', CONFIG.dimensions.logoPdfWidth);
         root.style.setProperty('--pdf-logo-h', CONFIG.dimensions.logoPdfHeight);
         root.style.setProperty('--pdf-photo-h', CONFIG.dimensions.photoPdfHeight);
-    };
+    }
+
+    // Fonction utilitaire pour éviter les erreurs si un champ n'existe pas
+    function setValIfExist(id, val) {
+        const el = document.getElementById(id);
+        if(el) el.value = val;
+    }
 
     function remplirSelect(id, optionsArray) {
         const sel = document.getElementById(id);
+        if(!sel) return;
+        sel.innerHTML = ""; 
         optionsArray.forEach(opt => {
             const el = document.createElement('option');
             el.value = opt;
@@ -280,36 +518,62 @@
         });
     }
 
-    // ==========================================
-    // LOGIQUE METIER
-    // ==========================================
-    var images = { 'file1': [], 'file2': [], 'file3': [] };
+    // Détection robuste du chargement du DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+        initApp();
+    }
 
-    // Aperçu photos
+    // ==========================================
+    // LOGIQUE METIER (PHOTOS SECTIONS FIXES)
+    // ==========================================
+    
+    function redrawFixedGrid(gridId, currentImages) {
+        const grid = document.getElementById(gridId);
+        grid.innerHTML = '';
+        currentImages.forEach(src => {
+            var img = document.createElement('img');
+            img.src = src; img.className = 'thumb';
+            grid.appendChild(img);
+        });
+    }
+
+    // Aperçu photos des sections 3, 4, 5 (maintenant en mode AJOUT)
     function prev(input, gridId) {
-        var grid = document.getElementById(gridId);
+        const imageKey = input.id;
+        
+        if (!images[imageKey]) {
+            images[imageKey] = [];
+        }
+        
         if (input.files) {
             Array.from(input.files).forEach(f => {
                 var reader = new FileReader();
                 reader.onload = e => {
-                    images[input.id].push(e.target.result);
-                    var img = document.createElement('img');
-                    img.src = e.target.result; img.className = 'thumb';
-                    grid.appendChild(img);
+                    images[imageKey].push(e.target.result);
+                    // Re-dessiner l'intégralité de la grille avec le nouveau set
+                    redrawFixedGrid(gridId, images[imageKey]);
                 }
                 reader.readAsDataURL(f);
             });
         }
+        // Reset input value to allow the same file to be selected again
+        input.value = ''; 
     }
 
-    // Helpers
-    function getVal(id) { return document.getElementById(id).value; }
+    // Helpers lecture valeurs
+    function getVal(id) { 
+        var el = document.getElementById(id);
+        return el ? el.value : ''; 
+    }
+    
     function getRadio(name) { 
         var el = document.querySelector('input[name="'+name+'"]:checked');
         return el ? el.value : '';
     }
+    
     function getCheck() {
-        // On récupère les inputs dans le container généré
         var c = document.querySelectorAll('#i_acc_container input:checked');
         var v = []; for(var i=0; i<c.length; i++) v.push(c[i].value);
         return v.join(', ');
@@ -317,6 +581,59 @@
 
     // --- GÉNÉRER LE RAPPORT ---
     function genererRapport() {
+        // Collecter tous les commentaires valides
+        const allComments = [];
+        const commentFields = document.querySelectorAll('#comment_fields_container textarea');
+        
+        commentFields.forEach((textarea, index) => {
+            const rawComment = textarea.value.trim();
+            if (rawComment) {
+                // Remplacer les sauts de ligne par <br> pour l'affichage HTML
+                const formattedComment = rawComment.replace(/\n/g, '<br>'); 
+                allComments.push({
+                    number: index + 1,
+                    id: textarea.id, // Utilisé pour récupérer les images
+                    text: formattedComment
+                });
+            }
+        });
+
+        // Générer le bloc HTML des commentaires
+        let commentDetailsHtml = '';
+        if (allComments.length > 0) {
+            commentDetailsHtml = allComments.map(c => {
+                const imagesForComment = commentImages[c.id] || [];
+                
+                let photoHtml = '';
+                if (imagesForComment.length > 0) {
+                    photoHtml = `
+                        <div style="font-size: 14px; margin-top: 10px; margin-bottom: 5px; font-weight: bold; color: #444;">Photos associées (6.${c.number})</div>
+                        <div class="p-grid" style="margin-top: 0;">
+                            ${imagesForComment.map(src => `<img src="${src}" class="p-img">`).join('')}
+                        </div>
+                    `;
+                }
+                
+                // Retourne la ligne du tableau pour le commentaire et les photos
+                return `
+                    <tr>
+                        <th style="width: 15%;">6.${c.number}</th>
+                        <td>
+                            ${c.text}
+                            ${photoHtml}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } else {
+            commentDetailsHtml = `
+                <tr>
+                    <th style="width: 15%;">6.1</th>
+                    <td>Aucun commentaire fourni.</td>
+                </tr>
+            `;
+        }
+
         var html = `
             <div class="p-header-container">
                 <img src="${CONFIG.logoUrl}" class="p-logo">
@@ -350,7 +667,7 @@
                 <div class="p-title">Localisation & Visite</div>
             </div>
 
-            <div class="p-h2">3. Localisation</div>
+            <div class="p-h2">3. Localisation (Plan)</div>
             <div class="p-grid">
                 ${images['file3'].map(src => `<img src="${src}" class="p-img">`).join('')}
             </div>
@@ -362,10 +679,22 @@
                 <tr><th>Accès</th><td>${getCheck()}</td></tr>
             </table>
 
-            <div class="p-h2">Photos Abords</div>
+            <div class="p-h2">5. Photos Abords</div>
             <div class="p-grid">
                 ${images['file2'].map(src => `<img src="${src}" class="p-img">`).join('')}
             </div>
+
+            <div style="page-break-before: always;"></div>
+            
+            <div class="p-header-container">
+                <img src="${CONFIG.logoUrl}" class="p-logo">
+                <div class="p-title">Commentaires</div>
+            </div>
+
+            <div class="p-h2">6. Commentaires et Observations (${allComments.length} entrée${allComments.length > 1 ? 's' : ''})</div>
+            <table>
+                ${commentDetailsHtml}
+            </table>
         `;
 
         document.getElementById('rapport-content').innerHTML = html;
