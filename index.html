@@ -128,6 +128,41 @@
             vertical-align: top; 
             box-sizing: border-box; /* Inclusion des marges dans la largeur */
         }
+
+        /* BARRE D'ACTION - Tailles ajustées */
+        .action-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; background: white;
+            padding: 15px; border-top: 1px solid #ccc; display: flex; gap: 15px; /* Écart augmenté */
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 9999;
+        }
+        .btn-back { 
+            flex: 1; 
+            background: #666; 
+            color: white; 
+            padding: 18px 10px; /* Padding augmenté */
+            border-radius: 12px; /* Coins plus arrondis */
+            border: none; 
+            font-weight: bold; 
+            font-size: 18px; /* Taille police augmentée */
+        }
+        .btn-print { 
+            flex: 2; 
+            background: var(--green); 
+            color: white; 
+            padding: 18px 10px; /* Padding augmenté */
+            border-radius: 12px; /* Coins plus arrondis */
+            border: none; 
+            font-weight: bold; 
+            font-size: 18px; /* Taille police augmentée */
+            cursor: pointer; 
+        }
+
+        @media print {
+            #section-formulaire, .action-bar { display: none !important; }
+            #section-rapport { display: block !important; padding: 0; margin: 0; }
+            body { background: white; padding: 0; margin: 0; }
+            .p-img { break-inside: avoid; }
+        }
     </style>
 </head>
 <body>
@@ -209,6 +244,7 @@
     </div>
     <!-- Fin Bloc 6. Commentaires dynamiques -->
 
+    <!-- Le bouton Aperçu est bien ici, il disparaît lorsque la section Rapport est affichée. -->
     <button class="btn-generate" onclick="genererRapportEtSauvegarder()">✅ GÉNÉRER L'APERÇU</button>
 </div>
 
@@ -218,7 +254,7 @@
 
 <div id="action-bar" class="action-bar hidden">
     <button class="btn-back" onclick="modeEdition()">✏️ Modifier</button>
-    <button class="btn-print" onclick="window.print()">💾 IMPRIMER</button>
+    <button class="btn-print" onclick="handlePrintAndSave()">💾 IMPRIMER</button>
 </div>
 
 <script>
@@ -301,7 +337,8 @@
             localStorage.setItem(CONFIG.IMAGE_STORAGE_KEY, JSON.stringify(imageData));
             console.log("Photothèque sauvegardée localement.");
         } catch(e) {
-            console.error("Erreur de sauvegarde de la photothèque:", e);
+            // Un appareil mobile peut avoir atteint la limite de localStorage (généralement 5MB)
+            console.error("Erreur de sauvegarde de la photothèque: Espace insuffisant ou erreur d'accès.", e);
         }
     }
 
@@ -325,28 +362,21 @@
             redrawFixedGrid('grid3', images.file3);
 
             // 2. Restaurer les commentaires dynamiques (uniquement la structure nécessaire aux images)
-            // On s'assure que commentImages contient la même structure de clés pour les photos
             commentImages = data.commentImages || {};
 
             // 3. Reconstruire les champs de commentaires pour réintégrer les images
             const container = document.getElementById('comment_fields_container');
-            container.innerHTML = ''; // Vider le champ
+            container.innerHTML = ''; 
             commentCounter = 0; 
 
-            // Créer les champs de commentaires à partir des clés de commentImages (ou un champ vide)
             const commentKeys = Object.keys(commentImages);
             if (commentKeys.length > 0) {
-                // Utiliser les IDs existants pour reconstruire les champs
-                // ATTENTION: Puisque nous n'avons pas les textes, on va juste créer le bon nombre de champs
-                // et restaurer les images. Le texte sera vide.
                 for (let i = 0; i < commentKeys.length; i++) {
-                     // Utiliser l'index pour garantir la séquence 1, 2, 3...
                      addCommentField('', commentImages[commentKeys[i]]);
                 }
-                // Après avoir ajouté les champs, on met à jour les numéros pour corriger les IDs
                 updateCommentNumbers();
             } else {
-                 addCommentField(); // S'assurer qu'il y a toujours au moins un champ vide
+                 addCommentField();
             }
 
             console.log("Photothèque chargée avec succès. Les champs de texte ont été réinitialisés.");
@@ -647,6 +677,17 @@
         saveImages(); // Sauvegarde uniquement la photothèque
         genererRapport();
     }
+    
+    /**
+     * Gère l'action d'impression et rappelle l'utilisateur de sauvegarder manuellement le PDF.
+     */
+    function handlePrintAndSave() {
+        window.print();
+        // Une fois l'impression lancée, un message modal peut être utile, mais on utilise ici console.log 
+        // ou on s'appuie sur la fenêtre d'impression native qui gère la sauvegarde en PDF.
+        console.log("Veuillez sélectionner 'Enregistrer au format PDF' ou 'Imprimer' dans la fenêtre d'impression.");
+    }
+
 
     // --- GÉNÉRER LE RAPPORT ---
     function genererRapport() {
