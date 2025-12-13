@@ -140,6 +140,7 @@
 
     <div class="box">
         <h2 class="form-h2">1. Identification</h2>
+        <label class="titre-champ">Client</label> <input type="text" id="i_client">
         <label class="titre-champ">N° Affaire</label> <input type="text" id="i_aff">
         <label class="titre-champ">Date</label> <input type="date" id="i_date">
         
@@ -234,8 +235,9 @@
 
         // Valeurs par défaut des champs
         defaults: {
+            client: "DIRMED", // NOUVEAU: Valeur par défaut pour le client
             affaire: "REV0_1111111",
-            localisation: "Stand de Tir des Trois Lucs",
+            localisation: "RN 202",
             identifiant: "P0227",
             gps: "Lat: 43.435, Lon: 6.365"
         },
@@ -466,6 +468,7 @@
             if(dateInput && !dateInput.value) dateInput.valueAsDate = new Date(); 
         } catch(e) { console.warn("Erreur date:", e); }
         
+        setValIfExist('i_client', CONFIG.defaults.client); // NOUVEAU: Initialisation du champ Client
         setValIfExist('i_aff', CONFIG.defaults.affaire);
         setValIfExist('i_loc', CONFIG.defaults.localisation);
         setValIfExist('i_id', CONFIG.defaults.identifiant);
@@ -642,6 +645,7 @@
             
             <div class="p-h2">1. Identification</div>
             <table>
+                <tr><th>Client</th><td>${getVal('i_client')}</td></tr>
                 <tr><th>N° Affaire</th><td>${getVal('i_aff')}</td></tr>
                 <tr><th>Date</th><td>${getVal('i_date')}</td></tr>
                 <tr><th>Intervenant</th><td>${getVal('i_int')}</td></tr>
