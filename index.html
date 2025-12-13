@@ -163,7 +163,6 @@
     <div class="box">
         <h2 class="form-h2">3. Photos Couverture</h2>
         <label for="file1" class="photo-btn">📷 Ajouter Photo</label>
-        <!-- prev() est mis à jour pour ajouter au lieu de remplacer -->
         <input type="file" id="file1" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid1')">
         <div id="grid1" class="preview-grid"></div>
     </div>
@@ -173,7 +172,6 @@
         
         <label class="titre-champ">Plan (Photos)</label>
         <label for="file3" class="photo-btn">📷 Ajouter Photo Plan</label>
-        <!-- prev() est mis à jour pour ajouter au lieu de remplacer -->
         <input type="file" id="file3" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid3')">
         <div id="grid3" class="preview-grid"></div>
 
@@ -197,7 +195,6 @@
     <div class="box">
         <h2 class="form-h2">5. Photos Abords</h2>
         <label for="file2" class="photo-btn">📷 Ajouter Photo</label>
-        <!-- prev() est mis à jour pour ajouter au lieu de remplacer -->
         <input type="file" id="file2" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid2')">
         <div id="grid2" class="preview-grid"></div>
     </div>
@@ -212,7 +209,7 @@
     </div>
     <!-- Fin Bloc 6. Commentaires dynamiques -->
 
-    <button class="btn-generate" onclick="genererRapport()">✅ GÉNÉRER L'APERÇU</button>
+    <button class="btn-generate" onclick="genererRapportEtSauvegarder()">✅ GÉNÉRER L'APERÇU</button>
 </div>
 
 <div id="section-rapport" class="hidden">
@@ -229,13 +226,16 @@
     // CONFIGURATION GENERALE
     // ==========================================
     const CONFIG = {
+        // Clé unique pour le stockage local des PHOTOS uniquement
+        IMAGE_STORAGE_KEY: "RapportVisiteImages", 
+        
         // Textes et Liens
         titreApplication: "Rapport Visite",
         logoUrl: "https://img.batiweb.com/repo-images/supplier/5820813/apave-logo.webp",
 
         // Valeurs par défaut des champs
         defaults: {
-            client: "DIRMED", // NOUVEAU: Valeur par défaut pour le client
+            client: "DIRMED", 
             affaire: "REV0_1111111",
             localisation: "RN 202",
             identifiant: "P0227",
@@ -276,15 +276,88 @@
     // ==========================================
     // VARIABLES GLOBALES (Stockage des données)
     // ==========================================
-    let commentCounter = 0; // Compteur pour générer les IDs uniques
+    let commentCounter = 0; 
 
     // Stockage des images des sections fixes (3, 4, 5)
-    // Format: { 'file1': [base64_url, ...], ... }
     var images = { 'file1': [], 'file2': [], 'file3': [] }; 
     
     // Stockage des images des commentaires dynamiques (Section 6)
-    // Format: { 'i_comment_1': [base64_url, ...], 'i_comment_2': [...] }
     var commentImages = {}; 
+
+    // ==========================================
+    // LOGIQUE DE SAUVEGARDE LOCALE (LocalStorage)
+    // ==========================================
+
+    /**
+     * Sauvegarde uniquement les images fixes et dynamiques dans le stockage local.
+     */
+    function saveImages() {
+        const imageData = {
+            fixedImages: images,
+            commentImages: commentImages
+        };
+        
+        try {
+            localStorage.setItem(CONFIG.IMAGE_STORAGE_KEY, JSON.stringify(imageData));
+            console.log("Photothèque sauvegardée localement.");
+        } catch(e) {
+            console.error("Erreur de sauvegarde de la photothèque:", e);
+        }
+    }
+
+    /**
+     * Charge les images du stockage local et les restaure dans les variables globales.
+     * @returns {boolean} Vrai si les données ont été chargées, Faux sinon.
+     */
+    function loadImages() {
+        try {
+            const storedData = localStorage.getItem(CONFIG.IMAGE_STORAGE_KEY);
+            if (!storedData) {
+                return false;
+            }
+
+            const data = JSON.parse(storedData);
+
+            // 1. Restaurer les images des sections fixes
+            images = data.fixedImages || { 'file1': [], 'file2': [], 'file3': [] };
+            redrawFixedGrid('grid1', images.file1);
+            redrawFixedGrid('grid2', images.file2);
+            redrawFixedGrid('grid3', images.file3);
+
+            // 2. Restaurer les commentaires dynamiques (uniquement la structure nécessaire aux images)
+            // On s'assure que commentImages contient la même structure de clés pour les photos
+            commentImages = data.commentImages || {};
+
+            // 3. Reconstruire les champs de commentaires pour réintégrer les images
+            const container = document.getElementById('comment_fields_container');
+            container.innerHTML = ''; // Vider le champ
+            commentCounter = 0; 
+
+            // Créer les champs de commentaires à partir des clés de commentImages (ou un champ vide)
+            const commentKeys = Object.keys(commentImages);
+            if (commentKeys.length > 0) {
+                // Utiliser les IDs existants pour reconstruire les champs
+                // ATTENTION: Puisque nous n'avons pas les textes, on va juste créer le bon nombre de champs
+                // et restaurer les images. Le texte sera vide.
+                for (let i = 0; i < commentKeys.length; i++) {
+                     // Utiliser l'index pour garantir la séquence 1, 2, 3...
+                     addCommentField('', commentImages[commentKeys[i]]);
+                }
+                // Après avoir ajouté les champs, on met à jour les numéros pour corriger les IDs
+                updateCommentNumbers();
+            } else {
+                 addCommentField(); // S'assurer qu'il y a toujours au moins un champ vide
+            }
+
+            console.log("Photothèque chargée avec succès. Les champs de texte ont été réinitialisés.");
+            return true;
+        } catch(e) {
+            console.error("Erreur de chargement de la photothèque:", e);
+            localStorage.removeItem(CONFIG.IMAGE_STORAGE_KEY);
+            return false;
+        }
+    }
+
 
     // ==========================================
     // LOGIQUE COMMENTAIRES DYNAMIQUES
@@ -310,7 +383,6 @@
         const photoInputId = `comment_img_input_${commentCounter}`;
         const photoGridId = `comment_grid_${commentCounter}`;
 
-        // Initialiser/Remplacer l'entrée dans le stockage d'images des commentaires
         commentImages[commentId] = initialImages;
 
         const div = document.createElement('div');
@@ -329,14 +401,12 @@
         `;
         container.appendChild(div);
 
-        // Remplissage de la grille si des images initiales sont fournies
         updateCommentPreviewGrid(photoGridId, initialImages);
     }
 
     function removeCommentField(itemId) {
         const item = document.getElementById(itemId);
         if (item) {
-            // Supprimer l'entrée du stockage d'images avant de supprimer l'élément DOM
             const textarea = item.querySelector('textarea');
             if (textarea && commentImages[textarea.id]) {
                 delete commentImages[textarea.id];
@@ -349,14 +419,13 @@
     function updateCommentNumbers() {
         const fields = document.querySelectorAll('#comment_fields_container .comment-item');
         let newCounter = 0;
-        const oldCommentImages = { ...commentImages }; // Snapshot old images
-        commentImages = {}; // Réinitialiser le stockage d'images des commentaires
+        const oldCommentImages = { ...commentImages }; 
+        commentImages = {}; 
 
         fields.forEach((field, index) => {
             const number = index + 1;
             newCounter = number;
             
-            // Nouveau IDs
             const newCommentId = `i_comment_${number}`;
             const newPhotoInputId = `comment_img_input_${number}`;
             const newPhotoGridId = `comment_grid_${number}`;
@@ -367,13 +436,11 @@
                 const oldCommentId = textarea.id; 
                 textarea.id = newCommentId;
                 
-                // Transférer les images vers la nouvelle clé de stockage
                 if (oldCommentImages[oldCommentId]) {
                     commentImages[newCommentId] = oldCommentImages[oldCommentId];
                 }
             }
             
-            // Mise à jour des IDs DOM et des gestionnaires d'événements
             field.id = newFieldId;
             const photoInput = field.querySelector('input[type="file"]');
             const photoBtn = field.querySelector('label[for^="comment_img_input"]');
@@ -388,11 +455,9 @@
             }
             if(photoGrid) {
                 photoGrid.id = newPhotoGridId;
-                // Re-remplir la grille avec les données d'image correctes
                 updateCommentPreviewGrid(newPhotoGridId, commentImages[newCommentId] || []);
             }
 
-            // Mise à jour des labels et boutons
             const labelSpan = field.querySelector('.titre-champ span');
             if (labelSpan) {
                  labelSpan.textContent = `Commentaire ${number}`;
@@ -405,10 +470,9 @@
         commentCounter = newCounter;
     }
 
-    // Gestionnaire de prévisualisation pour les images de commentaires (maintenant en mode AJOUT)
+    // Gestionnaire de prévisualisation pour les images de commentaires (mode AJOUT)
     function prevComment(input, gridId, commentId) {
         
-        // 1. Assurez-vous que le tableau existe pour ce commentaire
         if (!commentImages[commentId]) {
             commentImages[commentId] = [];
         }
@@ -419,7 +483,6 @@
         let filesProcessed = 0;
         
         files.forEach(f => {
-            // 2. Vérifier si on a atteint la limite de 4 images
             if (commentImages[commentId].length >= 4) {
                 console.warn(`Limite de 4 images atteinte pour le commentaire ${commentId}.`);
                 return; 
@@ -427,17 +490,14 @@
             
             var reader = new FileReader();
             reader.onload = (e) => {
-                // Ajouter l'image si la limite n'est pas atteinte
                 if (commentImages[commentId].length < 4) {
                     commentImages[commentId].push(e.target.result); 
                 }
 
                 filesProcessed++;
                 
-                // 3. Mettre à jour la grille UNIQUEMENT après que TOUTES les lectures asynchrones sont terminées
                 if (filesProcessed === files.length) {
                     updateCommentPreviewGrid(gridId, commentImages[commentId]);
-                    // Important: Réinitialiser la valeur de l'input pour pouvoir sélectionner les MÊMES fichiers à nouveau
                     input.value = ''; 
                 }
             };
@@ -454,31 +514,23 @@
     function initApp() {
         console.log("Initialisation de l'application...");
         
-        // 1. Initialiser le titre et le logo
+        // 1. Initialiser le titre, logo, et CSS dynamiques
         const appTitle = document.getElementById('app-title');
         const appLogo = document.getElementById('app-logo');
-        
         if(appTitle) appTitle.textContent = CONFIG.titreApplication;
         if(appLogo) appLogo.src = CONFIG.logoUrl;
         document.title = CONFIG.titreApplication;
-
-        // 2. Initialiser les valeurs par défaut (sauf les commentaires)
-        try { 
-            const dateInput = document.getElementById('i_date');
-            if(dateInput && !dateInput.value) dateInput.valueAsDate = new Date(); 
-        } catch(e) { console.warn("Erreur date:", e); }
         
-        setValIfExist('i_client', CONFIG.defaults.client); // NOUVEAU: Initialisation du champ Client
-        setValIfExist('i_aff', CONFIG.defaults.affaire);
-        setValIfExist('i_loc', CONFIG.defaults.localisation);
-        setValIfExist('i_id', CONFIG.defaults.identifiant);
-        setValIfExist('i_gps', CONFIG.defaults.gps);
+        const root = document.documentElement;
+        root.style.setProperty('--pdf-logo-w', CONFIG.dimensions.logoPdfWidth);
+        root.style.setProperty('--pdf-logo-h', CONFIG.dimensions.logoPdfHeight);
+        root.style.setProperty('--pdf-photo-h', CONFIG.dimensions.photoPdfHeight);
 
-        // 3. Remplir les listes déroulantes
+
+        // 2. Remplir les listes déroulantes et les checkboxes (Structure)
         remplirSelect('i_int', CONFIG.intervenants);
         remplirSelect('i_type', CONFIG.typesOuvrage);
 
-        // 4. Générer les cases à cocher pour l'accès
         const accContainer = document.getElementById('i_acc_container');
         if (accContainer && accContainer.innerHTML === "") {
             CONFIG.moyensAcces.forEach(opt => {
@@ -489,18 +541,28 @@
             });
         }
         
-        // 5. Initialiser les champs de commentaires par défaut
-        if (CONFIG.initialComments.length > 0) {
-            CONFIG.initialComments.forEach(comment => addCommentField(comment.text, comment.images));
-        } else {
-             addCommentField(); // Au moins un champ vide
-        }
+        // 3. Charger uniquement la photothèque
+        loadImages(); 
 
-        // 6. Appliquer les dimensions CSS dynamiquement
-        const root = document.documentElement;
-        root.style.setProperty('--pdf-logo-w', CONFIG.dimensions.logoPdfWidth);
-        root.style.setProperty('--pdf-logo-h', CONFIG.dimensions.logoPdfHeight);
-        root.style.setProperty('--pdf-photo-h', CONFIG.dimensions.photoPdfHeight);
+        // 4. Appliquer les valeurs par défaut aux champs de texte et re-définir la date/radios
+        try { 
+            const dateInput = document.getElementById('i_date');
+            if(dateInput && !dateInput.value) dateInput.valueAsDate = new Date(); 
+        } catch(e) { console.warn("Erreur date:", e); }
+        
+        setValIfExist('i_client', CONFIG.defaults.client); 
+        setValIfExist('i_aff', CONFIG.defaults.affaire);
+        setValIfExist('i_loc', CONFIG.defaults.localisation);
+        setValIfExist('i_id', CONFIG.defaults.identifiant);
+        setValIfExist('i_gps', CONFIG.defaults.gps);
+
+        // Les radios et selects ne peuvent pas être restaurés ici car loadImages() ne les a pas.
+        // On s'assure qu'ils sont à leur état par défaut/initial du HTML.
+        
+        // S'assurer qu'il y a au moins un champ de commentaire s'il n'y en avait pas eu dans la photothèque.
+        if (document.querySelectorAll('#comment_fields_container .comment-item').length === 0) {
+             addCommentField(); 
+        }
     }
 
     // Fonction utilitaire pour éviter les erreurs si un champ n'existe pas
@@ -542,7 +604,7 @@
         });
     }
 
-    // Aperçu photos des sections 3, 4, 5 (maintenant en mode AJOUT)
+    // Aperçu photos des sections 3, 4, 5 (mode AJOUT)
     function prev(input, gridId) {
         const imageKey = input.id;
         
@@ -555,13 +617,11 @@
                 var reader = new FileReader();
                 reader.onload = e => {
                     images[imageKey].push(e.target.result);
-                    // Re-dessiner l'intégralité de la grille avec le nouveau set
                     redrawFixedGrid(gridId, images[imageKey]);
                 }
                 reader.readAsDataURL(f);
             });
         }
-        // Reset input value to allow the same file to be selected again
         input.value = ''; 
     }
 
@@ -582,6 +642,12 @@
         return v.join(', ');
     }
 
+    // Fonction combinée pour générer l'aperçu ET sauvegarder
+    function genererRapportEtSauvegarder() {
+        saveImages(); // Sauvegarde uniquement la photothèque
+        genererRapport();
+    }
+
     // --- GÉNÉRER LE RAPPORT ---
     function genererRapport() {
         // Collecter tous les commentaires valides
@@ -591,11 +657,10 @@
         commentFields.forEach((textarea, index) => {
             const rawComment = textarea.value.trim();
             if (rawComment) {
-                // Remplacer les sauts de ligne par <br> pour l'affichage HTML
                 const formattedComment = rawComment.replace(/\n/g, '<br>'); 
                 allComments.push({
                     number: index + 1,
-                    id: textarea.id, // Utilisé pour récupérer les images
+                    id: textarea.id, 
                     text: formattedComment
                 });
             }
@@ -617,7 +682,6 @@
                     `;
                 }
                 
-                // Retourne la ligne du tableau pour le commentaire et les photos
                 return `
                     <tr>
                         <th style="width: 15%;">6.${c.number}</th>
