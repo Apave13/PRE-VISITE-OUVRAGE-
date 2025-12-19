@@ -244,7 +244,6 @@
     </div>
     <!-- Fin Bloc 6. Commentaires dynamiques -->
 
-    <!-- Le bouton Aperçu est bien ici, il disparaît lorsque la section Rapport est affichée. -->
     <button class="btn-generate" onclick="genererRapportEtSauvegarder()">✅ GÉNÉRER L'APERÇU</button>
 </div>
 
@@ -286,7 +285,7 @@
             "Jeremy CANDAELLE"
         ],
         typesOuvrage: [
-            "MUR", "PONT", "BUSE", "TUNNEL", "DALLOT"
+            "MUR", "PONT", "BUSE", "TUNNEL", "DALLOT", "BATIMENT"
         ],
 
         // Liste des accès (Cases à cocher)
@@ -586,9 +585,6 @@
         setValIfExist('i_id', CONFIG.defaults.identifiant);
         setValIfExist('i_gps', CONFIG.defaults.gps);
 
-        // Les radios et selects ne peuvent pas être restaurés ici car loadImages() ne les a pas.
-        // On s'assure qu'ils sont à leur état par défaut/initial du HTML.
-        
         // S'assurer qu'il y a au moins un champ de commentaire s'il n'y en avait pas eu dans la photothèque.
         if (document.querySelectorAll('#comment_fields_container .comment-item').length === 0) {
              addCommentField(); 
@@ -683,8 +679,6 @@
      */
     function handlePrintAndSave() {
         window.print();
-        // Une fois l'impression lancée, un message modal peut être utile, mais on utilise ici console.log 
-        // ou on s'appuie sur la fenêtre d'impression native qui gère la sauvegarde en PDF.
         console.log("Veuillez sélectionner 'Enregistrer au format PDF' ou 'Imprimer' dans la fenêtre d'impression.");
     }
 
