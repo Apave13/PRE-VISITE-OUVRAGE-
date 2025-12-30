@@ -9,10 +9,9 @@
         :root { 
             --blue: #1D3051; 
             --green: #009A4D; 
-            /* Les dimensions sont définies via JS, valeurs de fallback ici */
             --pdf-logo-w: 2.78cm;
             --pdf-logo-h: 1.36cm;
-            --pdf-photo-h: 250px; /* Taille PDF augmentée pour les grilles 2x2 */
+            --pdf-photo-h: 250px;
         }
         body { font-family: -apple-system, Helvetica, Arial, sans-serif; background: #f2f2f7; margin: 0; padding: 0; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -23,7 +22,6 @@
         /* --- INTERFACE DE SAISIE --- */
         #section-formulaire { padding: 15px; padding-bottom: 120px; display: block; max-width: 800px; margin: 0 auto; }
         
-        /* BANDEAU ECRAN */
         .header { 
             background: var(--blue); color: white; padding: 15px; 
             display: flex; align-items: center; justify-content: center;
@@ -39,14 +37,12 @@
         .box { background: white; padding: 20px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         h2.form-h2 { color: var(--blue); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; font-size: 1.1em; }
         
-        /* CHAMPS - Ajout de 'textarea' ici */
         label.titre-champ { display: block; font-weight: bold; margin-top: 15px; margin-bottom: 5px; color: #333; }
         input[type="text"], input[type="date"], select, textarea { 
             width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; 
             font-size: 16px; background: white; -webkit-appearance: none; 
         }
 
-        /* CHOIX */
         .choix-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
         .label-choix {
             background: #f0f2f5; border: 1px solid #ccc; padding: 12px; border-radius: 8px; 
@@ -54,7 +50,6 @@
         }
         .label-choix input { width: 25px; height: 25px; margin: 0; accent-color: var(--green); }
 
-        /* PHOTOS */
         .photo-btn {
             display: block; width: 100%; background: #e9e9e9; color: #333; padding: 15px;
             text-align: center; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer; border: 2px dashed #ccc;
@@ -62,100 +57,39 @@
         .hidden-input { opacity: 0; position: absolute; z-index: -1; width: 1px; height: 1px; }
 
         .preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-        /* Aperçu plus petit pour les photos de commentaires */
         .comment-item .preview-grid { grid-template-columns: repeat(4, 1fr); margin-top: 5px;} 
         .thumb { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; }
 
-        /* BOUTON GENERER */
         .btn-generate {
             display: block; width: 100%; background: var(--blue); color: white; border: none; padding: 20px;
             font-size: 18px; font-weight: bold; border-radius: 12px; margin-top: 20px; cursor: pointer;
         }
 
-        /* --- STYLES COMMENTAIRES MULTIPLES --- */
-        .comment-item {
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px dashed #eee;
-        }
-        .comment-item:first-child {
-            border-top: none;
-            margin-top: 0;
-            padding-top: 0;
-        }
-        .comment-item .titre-champ {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .comment-item button {
-            background: none;
-            border: none;
-            color: #e74c3c;
-            font-weight: bold;
-            font-size: 0.9em;
-            cursor: pointer;
-            padding: 5px 0;
-        }
+        .comment-item { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #eee; }
+        .comment-item:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+        .comment-item .titre-champ { display: flex; justify-content: space-between; align-items: center; }
+        .comment-item button { background: none; border: none; color: #e74c3c; font-weight: bold; font-size: 0.9em; cursor: pointer; padding: 5px 0; }
 
         /* --- ZONE RAPPORT FINAL (PDF) --- */
         #section-rapport { background: white; min-height: 100vh; padding: 20px; padding-bottom: 120px; }
-        
         .p-header-container { display: flex; align-items: center; border-bottom: 2px solid var(--blue); margin-bottom: 20px; padding-bottom: 10px; }
-        
-        /* Utilisation des variables CSS pour les dimensions */
         .p-logo { width: var(--pdf-logo-w); height: var(--pdf-logo-h); object-fit: contain; margin-right: 20px; }
-        
         .p-title { color: var(--blue); font-size: 22px; font-weight: bold; flex-grow: 1; text-align: center; }
         .p-h2 { color: #333; font-size: 16px; border-bottom: 1px solid #ccc; margin-top: 25px; margin-bottom: 10px; font-weight: bold; }
-        
         table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
         th, td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 12px; vertical-align: top; }
         th { background-color: #f0f0f0; width: 35%; }
-
-        /* Photos PDF 2x2 */
         .p-grid { display: block; text-align: center; margin-top: 10px; font-size: 0; }
-        
-        /* Utilisation de la variable hauteur photo */
-        /* Dans le rapport, les photos sont affichées dans la colonne TD, leur largeur est relative au TD */
-        .p-img { 
-            width: 48%; /* 2 photos par ligne dans le TD */
-            height: var(--pdf-photo-h); 
-            object-fit: contain; 
-            display: inline-block; 
-            margin: 0 1% 10px 0; 
-            border: 1px solid #eee; 
-            vertical-align: top; 
-            box-sizing: border-box; /* Inclusion des marges dans la largeur */
-        }
+        .p-img { width: 48%; height: var(--pdf-photo-h); object-fit: contain; display: inline-block; margin: 0 1% 10px 0; border: 1px solid #eee; vertical-align: top; box-sizing: border-box; }
 
-        /* BARRE D'ACTION - Tailles ajustées */
+        /* BARRE D'ACTION */
         .action-bar {
             position: fixed; bottom: 0; left: 0; right: 0; background: white;
-            padding: 15px; border-top: 1px solid #ccc; display: flex; gap: 15px; /* Écart augmenté */
+            padding: 15px; border-top: 1px solid #ccc; display: flex; gap: 15px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 9999;
         }
-        .btn-back { 
-            flex: 1; 
-            background: #666; 
-            color: white; 
-            padding: 18px 10px; /* Padding augmenté */
-            border-radius: 12px; /* Coins plus arrondis */
-            border: none; 
-            font-weight: bold; 
-            font-size: 18px; /* Taille police augmentée */
-        }
-        .btn-print { 
-            flex: 2; 
-            background: var(--green); 
-            color: white; 
-            padding: 18px 10px; /* Padding augmenté */
-            border-radius: 12px; /* Coins plus arrondis */
-            border: none; 
-            font-weight: bold; 
-            font-size: 18px; /* Taille police augmentée */
-            cursor: pointer; 
-        }
+        .btn-back { flex: 1; background: #666; color: white; padding: 18px 10px; border-radius: 12px; border: none; font-weight: bold; font-size: 18px; }
+        .btn-print { flex: 2; background: var(--green); color: white; padding: 18px 10px; border-radius: 12px; border: none; font-weight: bold; font-size: 18px; cursor: pointer; }
 
         @media print {
             #section-formulaire, .action-bar { display: none !important; }
@@ -180,16 +114,13 @@
         <label class="titre-champ">Date</label> <input type="date" id="i_date">
         
         <label class="titre-champ">Intervenant</label> 
-        <!-- Les options sont générées par JS -->
         <select id="i_int"></select>
     </div>
 
     <div class="box">
         <h2 class="form-h2">2. Ouvrage</h2>
         <label class="titre-champ">Type</label> 
-        <!-- Les options sont générées par JS -->
         <select id="i_type"></select>
-        
         <label class="titre-champ">Localisation</label> <input type="text" id="i_loc">
         <label class="titre-champ">Identifiant</label> <input type="text" id="i_id">
         <label class="titre-champ">GPS</label> <input type="text" id="i_gps">
@@ -198,16 +129,15 @@
     <div class="box">
         <h2 class="form-h2">3. Photos Couverture</h2>
         <label for="file1" class="photo-btn">📷 Ajouter Photo</label>
-        <input type="file" id="file1" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid1')">
+        <input type="file" id="file1" class="hidden-input" accept="image/*" multiple onchange="handleFileSelect(this, 'grid1', 'file1')">
         <div id="grid1" class="preview-grid"></div>
     </div>
 
     <div class="box">
         <h2 class="form-h2">4. Visite</h2>
-        
         <label class="titre-champ">Plan (Photos)</label>
         <label for="file3" class="photo-btn">📷 Ajouter Photo Plan</label>
-        <input type="file" id="file3" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid3')">
+        <input type="file" id="file3" class="hidden-input" accept="image/*" multiple onchange="handleFileSelect(this, 'grid3', 'file3')">
         <div id="grid3" class="preview-grid"></div>
 
         <label class="titre-champ">Débroussaillage</label> 
@@ -223,26 +153,21 @@
         </div>
 
         <label class="titre-champ">Accès</label>
-        <!-- Les cases à cocher sont générées par JS -->
         <div class="choix-container" id="i_acc_container"></div>
     </div>
 
     <div class="box">
         <h2 class="form-h2">5. Photos Abords</h2>
         <label for="file2" class="photo-btn">📷 Ajouter Photo</label>
-        <input type="file" id="file2" class="hidden-input" accept="image/*" multiple onchange="prev(this, 'grid2')">
+        <input type="file" id="file2" class="hidden-input" accept="image/*" multiple onchange="handleFileSelect(this, 'grid2', 'file2')">
         <div id="grid2" class="preview-grid"></div>
     </div>
     
-    <!-- Bloc 6. Commentaires dynamiques -->
     <div class="box">
         <h2 class="form-h2">6. Commentaires</h2>
-        <div id="comment_fields_container">
-            <!-- Les champs de commentaires sont insérés ici par JS -->
-        </div>
+        <div id="comment_fields_container"></div>
         <button type="button" class="photo-btn" onclick="addCommentField()">+ Ajouter un Commentaire</button>
     </div>
-    <!-- Fin Bloc 6. Commentaires dynamiques -->
 
     <button class="btn-generate" onclick="genererRapportEtSauvegarder()">✅ GÉNÉRER L'APERÇU</button>
 </div>
@@ -261,14 +186,14 @@
     // CONFIGURATION GENERALE
     // ==========================================
     const CONFIG = {
-        // Clé unique pour le stockage local des PHOTOS uniquement
         IMAGE_STORAGE_KEY: "RapportVisiteImages", 
-        
-        // Textes et Liens
         titreApplication: "Rapport Visite",
         logoUrl: "https://img.batiweb.com/repo-images/supplier/5820813/apave-logo.webp",
+        
+        // PARAMETRES DE COMPRESSION PHOTO
+        maxImageWidth: 1024,      // Largeur max en pixels
+        compressionQuality: 0.8,  // Qualité JPEG (0.1 à 1.0)
 
-        // Valeurs par défaut des champs
         defaults: {
             client: "DIRMED", 
             affaire: "REV0_1111111",
@@ -276,19 +201,8 @@
             identifiant: "P0227",
             gps: "Lat: 43.435, Lon: 6.365"
         },
-
-        // Listes déroulantes
-        intervenants: [
-            "Laurent SIALELLI",
-            "Caroline GAZULLA",
-            "David YVON",
-            "Jeremy CANDAELLE"
-        ],
-        typesOuvrage: [
-            "MUR", "PONT", "BUSE", "TUNNEL", "DALLOT", "BATIMENT"
-        ],
-
-        // Liste des accès (Cases à cocher)
+        intervenants: ["Laurent SIALELLI", "Caroline GAZULLA", "David YVON", "Jeremy CANDAELLE"],
+        typesOuvrage: ["MUR", "PONT", "BUSE", "TUNNEL", "DALLOT", "BATIMENT"],
         moyensAcces: [
             { label: "Nacelle Nég.", value: "Nacelle négative", checked: true },
             { label: "Nacelle Pos.", value: "Nacelle positive", checked: false },
@@ -296,11 +210,7 @@
             { label: "À pieds", value: "À pieds", checked: false },
             { label: "Drone", value: "Drone", checked: false }
         ],
-        
-        // Commentaires initiaux
         initialComments: [], 
-
-        // Dimensions pour le PDF/Impression
         dimensions: {
             logoPdfWidth: "2.78cm",
             logoPdfHeight: "1.36cm",
@@ -309,65 +219,106 @@
     };
 
     // ==========================================
-    // VARIABLES GLOBALES (Stockage des données)
+    // LOGIQUE DE COMPRESSION D'IMAGE
+    // ==========================================
+    function compressImage(base64Str, maxWidth, quality) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = base64Str;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth) {
+                    height = (maxWidth / width) * height;
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Exportation en JPEG compressé
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+        });
+    }
+
+    // ==========================================
+    // VARIABLES GLOBALES
     // ==========================================
     let commentCounter = 0; 
-
-    // Stockage des images des sections fixes (3, 4, 5)
     var images = { 'file1': [], 'file2': [], 'file3': [] }; 
-    
-    // Stockage des images des commentaires dynamiques (Section 6)
     var commentImages = {}; 
 
     // ==========================================
-    // LOGIQUE DE SAUVEGARDE LOCALE (LocalStorage)
+    // GESTION DES FICHIERS ET PHOTOS
     // ==========================================
-
-    /**
-     * Sauvegarde uniquement les images fixes et dynamiques dans le stockage local.
-     */
-    function saveImages() {
-        const imageData = {
-            fixedImages: images,
-            commentImages: commentImages
-        };
+    async function handleFileSelect(input, gridId, sectionKey) {
+        if (!input.files) return;
         
+        const files = Array.from(input.files);
+        for (const file of files) {
+            const base64 = await fileToBase64(file);
+            const compressed = await compressImage(base64, CONFIG.maxImageWidth, CONFIG.compressionQuality);
+            images[sectionKey].push(compressed);
+        }
+        redrawFixedGrid(gridId, images[sectionKey]);
+        input.value = ''; 
+    }
+
+    async function handleCommentFileSelect(input, gridId, commentId) {
+        if (!input.files) return;
+        if (!commentImages[commentId]) commentImages[commentId] = [];
+
+        const files = Array.from(input.files);
+        for (const file of files) {
+            if (commentImages[commentId].length >= 4) break;
+            const base64 = await fileToBase64(file);
+            const compressed = await compressImage(base64, CONFIG.maxImageWidth, CONFIG.compressionQuality);
+            commentImages[commentId].push(compressed);
+        }
+        updateCommentPreviewGrid(gridId, commentImages[commentId]);
+        input.value = ''; 
+    }
+
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    // ==========================================
+    // LOGIQUE DE SAUVEGARDE LOCALE
+    // ==========================================
+    function saveImages() {
+        const imageData = { fixedImages: images, commentImages: commentImages };
         try {
             localStorage.setItem(CONFIG.IMAGE_STORAGE_KEY, JSON.stringify(imageData));
-            console.log("Photothèque sauvegardée localement.");
+            console.log("Photothèque optimisée sauvegardée.");
         } catch(e) {
-            // Un appareil mobile peut avoir atteint la limite de localStorage (généralement 5MB)
-            console.error("Erreur de sauvegarde de la photothèque: Espace insuffisant ou erreur d'accès.", e);
+            console.error("Erreur : Espace de stockage insuffisant.", e);
         }
     }
 
-    /**
-     * Charge les images du stockage local et les restaure dans les variables globales.
-     * @returns {boolean} Vrai si les données ont été chargées, Faux sinon.
-     */
     function loadImages() {
         try {
             const storedData = localStorage.getItem(CONFIG.IMAGE_STORAGE_KEY);
-            if (!storedData) {
-                return false;
-            }
-
+            if (!storedData) return false;
             const data = JSON.parse(storedData);
-
-            // 1. Restaurer les images des sections fixes
             images = data.fixedImages || { 'file1': [], 'file2': [], 'file3': [] };
             redrawFixedGrid('grid1', images.file1);
             redrawFixedGrid('grid2', images.file2);
             redrawFixedGrid('grid3', images.file3);
-
-            // 2. Restaurer les commentaires dynamiques (uniquement la structure nécessaire aux images)
             commentImages = data.commentImages || {};
-
-            // 3. Reconstruire les champs de commentaires pour réintégrer les images
             const container = document.getElementById('comment_fields_container');
             container.innerHTML = ''; 
             commentCounter = 0; 
-
             const commentKeys = Object.keys(commentImages);
             if (commentKeys.length > 0) {
                 for (let i = 0; i < commentKeys.length; i++) {
@@ -377,43 +328,35 @@
             } else {
                  addCommentField();
             }
-
-            console.log("Photothèque chargée avec succès. Les champs de texte ont été réinitialisés.");
             return true;
         } catch(e) {
-            console.error("Erreur de chargement de la photothèque:", e);
             localStorage.removeItem(CONFIG.IMAGE_STORAGE_KEY);
             return false;
         }
     }
 
-
     // ==========================================
     // LOGIQUE COMMENTAIRES DYNAMIQUES
     // ==========================================
-
-    function updateCommentPreviewGrid(gridId, images) {
+    function updateCommentPreviewGrid(gridId, imgs) {
         const grid = document.getElementById(gridId);
         if (!grid) return;
         grid.innerHTML = '';
-        images.forEach(src => {
+        imgs.forEach(src => {
             var img = document.createElement('img');
             img.src = src; img.className = 'thumb';
             grid.appendChild(img);
         });
     }
 
-    function addCommentField(initialText = '', initialImages = []) {
+    function addCommentField(initialText = '', initialImgs = []) {
         commentCounter++;
         const container = document.getElementById('comment_fields_container');
         if (!container) return;
-
         const commentId = `i_comment_${commentCounter}`;
         const photoInputId = `comment_img_input_${commentCounter}`;
         const photoGridId = `comment_grid_${commentCounter}`;
-
-        commentImages[commentId] = initialImages;
-
+        commentImages[commentId] = initialImgs;
         const div = document.createElement('div');
         div.id = `comment_item_${commentCounter}`;
         div.className = 'comment-item';
@@ -423,23 +366,19 @@
                 <button type="button" onclick="removeCommentField('${div.id}')">Supprimer</button>
             </label>
             <textarea id="${commentId}" rows="3" placeholder="Saisissez votre commentaire ici...">${initialText}</textarea>
-            
             <label for="${photoInputId}" class="photo-btn" style="margin-top: 10px; border: 1px dashed #ccc; background: #fafafa; color: var(--blue); font-size: 0.9em;">+ Ajouter Photo(s) (Max. 4)</label>
-            <input type="file" id="${photoInputId}" class="hidden-input" accept="image/*" multiple onchange="prevComment(this, '${photoGridId}', '${commentId}')">
+            <input type="file" id="${photoInputId}" class="hidden-input" accept="image/*" multiple onchange="handleCommentFileSelect(this, '${photoGridId}', '${commentId}')">
             <div id="${photoGridId}" class="preview-grid"></div>
         `;
         container.appendChild(div);
-
-        updateCommentPreviewGrid(photoGridId, initialImages);
+        updateCommentPreviewGrid(photoGridId, initialImgs);
     }
 
     function removeCommentField(itemId) {
         const item = document.getElementById(itemId);
         if (item) {
             const textarea = item.querySelector('textarea');
-            if (textarea && commentImages[textarea.id]) {
-                delete commentImages[textarea.id];
-            }
+            if (textarea && commentImages[textarea.id]) delete commentImages[textarea.id];
             item.remove();
             updateCommentNumbers();
         }
@@ -450,116 +389,55 @@
         let newCounter = 0;
         const oldCommentImages = { ...commentImages }; 
         commentImages = {}; 
-
         fields.forEach((field, index) => {
             const number = index + 1;
             newCounter = number;
-            
             const newCommentId = `i_comment_${number}`;
             const newPhotoInputId = `comment_img_input_${number}`;
             const newPhotoGridId = `comment_grid_${number}`;
             const newFieldId = `comment_item_${number}`;
-
             const textarea = field.querySelector('textarea');
             if (textarea) {
                 const oldCommentId = textarea.id; 
                 textarea.id = newCommentId;
-                
-                if (oldCommentImages[oldCommentId]) {
-                    commentImages[newCommentId] = oldCommentImages[oldCommentId];
-                }
+                if (oldCommentImages[oldCommentId]) commentImages[newCommentId] = oldCommentImages[oldCommentId];
             }
-            
             field.id = newFieldId;
             const photoInput = field.querySelector('input[type="file"]');
             const photoBtn = field.querySelector('label[for^="comment_img_input"]');
             const photoGrid = field.querySelector('.preview-grid');
-            
             if(photoInput) {
                 photoInput.id = newPhotoInputId;
-                photoInput.setAttribute('onchange', `prevComment(this, '${newPhotoGridId}', '${newCommentId}')`);
+                photoInput.setAttribute('onchange', `handleCommentFileSelect(this, '${newPhotoGridId}', '${newCommentId}')`);
             }
-            if(photoBtn) {
-                photoBtn.setAttribute('for', newPhotoInputId);
-            }
+            if(photoBtn) photoBtn.setAttribute('for', newPhotoInputId);
             if(photoGrid) {
                 photoGrid.id = newPhotoGridId;
                 updateCommentPreviewGrid(newPhotoGridId, commentImages[newCommentId] || []);
             }
-
             const labelSpan = field.querySelector('.titre-champ span');
-            if (labelSpan) {
-                 labelSpan.textContent = `Commentaire ${number}`;
-            }
+            if (labelSpan) labelSpan.textContent = `Commentaire ${number}`;
             const removeBtn = field.querySelector('button');
-            if (removeBtn) {
-                removeBtn.setAttribute('onclick', `removeCommentField('${newFieldId}')`);
-            }
+            if (removeBtn) removeBtn.setAttribute('onclick', `removeCommentField('${newFieldId}')`);
         });
         commentCounter = newCounter;
     }
 
-    // Gestionnaire de prévisualisation pour les images de commentaires (mode AJOUT)
-    function prevComment(input, gridId, commentId) {
-        
-        if (!commentImages[commentId]) {
-            commentImages[commentId] = [];
-        }
-
-        if (input.files.length === 0) return;
-
-        const files = Array.from(input.files); 
-        let filesProcessed = 0;
-        
-        files.forEach(f => {
-            if (commentImages[commentId].length >= 4) {
-                console.warn(`Limite de 4 images atteinte pour le commentaire ${commentId}.`);
-                return; 
-            }
-            
-            var reader = new FileReader();
-            reader.onload = (e) => {
-                if (commentImages[commentId].length < 4) {
-                    commentImages[commentId].push(e.target.result); 
-                }
-
-                filesProcessed++;
-                
-                if (filesProcessed === files.length) {
-                    updateCommentPreviewGrid(gridId, commentImages[commentId]);
-                    input.value = ''; 
-                }
-            };
-            reader.readAsDataURL(f);
-        });
-    }
-
-
     // ==========================================
     // INITIALISATION
     // ==========================================
-    
-    // Fonction principale d'initialisation
     function initApp() {
-        console.log("Initialisation de l'application...");
-        
-        // 1. Initialiser le titre, logo, et CSS dynamiques
         const appTitle = document.getElementById('app-title');
         const appLogo = document.getElementById('app-logo');
         if(appTitle) appTitle.textContent = CONFIG.titreApplication;
         if(appLogo) appLogo.src = CONFIG.logoUrl;
         document.title = CONFIG.titreApplication;
-        
         const root = document.documentElement;
         root.style.setProperty('--pdf-logo-w', CONFIG.dimensions.logoPdfWidth);
         root.style.setProperty('--pdf-logo-h', CONFIG.dimensions.logoPdfHeight);
         root.style.setProperty('--pdf-photo-h', CONFIG.dimensions.photoPdfHeight);
-
-
-        // 2. Remplir les listes déroulantes et les checkboxes (Structure)
         remplirSelect('i_int', CONFIG.intervenants);
         remplirSelect('i_type', CONFIG.typesOuvrage);
-
         const accContainer = document.getElementById('i_acc_container');
         if (accContainer && accContainer.innerHTML === "") {
             CONFIG.moyensAcces.forEach(opt => {
@@ -569,29 +447,19 @@
                 accContainer.appendChild(label);
             });
         }
-        
-        // 3. Charger uniquement la photothèque
         loadImages(); 
-
-        // 4. Appliquer les valeurs par défaut aux champs de texte et re-définir la date/radios
-        try { 
-            const dateInput = document.getElementById('i_date');
-            if(dateInput && !dateInput.value) dateInput.valueAsDate = new Date(); 
-        } catch(e) { console.warn("Erreur date:", e); }
-        
         setValIfExist('i_client', CONFIG.defaults.client); 
         setValIfExist('i_aff', CONFIG.defaults.affaire);
         setValIfExist('i_loc', CONFIG.defaults.localisation);
         setValIfExist('i_id', CONFIG.defaults.identifiant);
         setValIfExist('i_gps', CONFIG.defaults.gps);
-
-        // S'assurer qu'il y a au moins un champ de commentaire s'il n'y en avait pas eu dans la photothèque.
-        if (document.querySelectorAll('#comment_fields_container .comment-item').length === 0) {
-             addCommentField(); 
-        }
+        try { 
+            const dateInput = document.getElementById('i_date');
+            if(dateInput && !dateInput.value) dateInput.valueAsDate = new Date(); 
+        } catch(e) {}
+        if (document.querySelectorAll('#comment_fields_container .comment-item').length === 0) addCommentField(); 
     }
 
-    // Fonction utilitaire pour éviter les erreurs si un champ n'existe pas
     function setValIfExist(id, val) {
         const el = document.getElementById(id);
         if(el) el.value = val;
@@ -603,55 +471,22 @@
         sel.innerHTML = ""; 
         optionsArray.forEach(opt => {
             const el = document.createElement('option');
-            el.value = opt;
-            el.textContent = opt;
-            sel.appendChild(el);
+            el.value = opt; el.textContent = opt; sel.appendChild(el);
         });
     }
 
-    // Détection robuste du chargement du DOM
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initApp);
-    } else {
-        initApp();
-    }
+    document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', initApp) : initApp();
 
-    // ==========================================
-    // LOGIQUE METIER (PHOTOS SECTIONS FIXES)
-    // ==========================================
-    
     function redrawFixedGrid(gridId, currentImages) {
         const grid = document.getElementById(gridId);
+        if (!grid) return;
         grid.innerHTML = '';
         currentImages.forEach(src => {
             var img = document.createElement('img');
-            img.src = src; img.className = 'thumb';
-            grid.appendChild(img);
+            img.src = src; img.className = 'thumb'; grid.appendChild(img);
         });
     }
 
-    // Aperçu photos des sections 3, 4, 5 (mode AJOUT)
-    function prev(input, gridId) {
-        const imageKey = input.id;
-        
-        if (!images[imageKey]) {
-            images[imageKey] = [];
-        }
-        
-        if (input.files) {
-            Array.from(input.files).forEach(f => {
-                var reader = new FileReader();
-                reader.onload = e => {
-                    images[imageKey].push(e.target.result);
-                    redrawFixedGrid(gridId, images[imageKey]);
-                }
-                reader.readAsDataURL(f);
-            });
-        }
-        input.value = ''; 
-    }
-
-    // Helpers lecture valeurs
     function getVal(id) { 
         var el = document.getElementById(id);
         return el ? el.value : ''; 
@@ -668,80 +503,43 @@
         return v.join(', ');
     }
 
-    // Fonction combinée pour générer l'aperçu ET sauvegarder
     function genererRapportEtSauvegarder() {
-        saveImages(); // Sauvegarde uniquement la photothèque
+        saveImages();
         genererRapport();
     }
     
-    /**
-     * Gère l'action d'impression et rappelle l'utilisateur de sauvegarder manuellement le PDF.
-     */
-    function handlePrintAndSave() {
-        window.print();
-        console.log("Veuillez sélectionner 'Enregistrer au format PDF' ou 'Imprimer' dans la fenêtre d'impression.");
-    }
+    function handlePrintAndSave() { window.print(); }
 
-
-    // --- GÉNÉRER LE RAPPORT ---
     function genererRapport() {
-        // Collecter tous les commentaires valides
         const allComments = [];
         const commentFields = document.querySelectorAll('#comment_fields_container textarea');
-        
         commentFields.forEach((textarea, index) => {
             const rawComment = textarea.value.trim();
             if (rawComment) {
-                const formattedComment = rawComment.replace(/\n/g, '<br>'); 
                 allComments.push({
                     number: index + 1,
                     id: textarea.id, 
-                    text: formattedComment
+                    text: rawComment.replace(/\n/g, '<br>')
                 });
             }
         });
 
-        // Générer le bloc HTML des commentaires
-        let commentDetailsHtml = '';
-        if (allComments.length > 0) {
-            commentDetailsHtml = allComments.map(c => {
-                const imagesForComment = commentImages[c.id] || [];
-                
-                let photoHtml = '';
-                if (imagesForComment.length > 0) {
-                    photoHtml = `
-                        <div style="font-size: 14px; margin-top: 10px; margin-bottom: 5px; font-weight: bold; color: #444;">Photos associées (6.${c.number})</div>
-                        <div class="p-grid" style="margin-top: 0;">
-                            ${imagesForComment.map(src => `<img src="${src}" class="p-img">`).join('')}
-                        </div>
-                    `;
-                }
-                
-                return `
-                    <tr>
-                        <th style="width: 15%;">6.${c.number}</th>
-                        <td>
-                            ${c.text}
-                            ${photoHtml}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        } else {
-            commentDetailsHtml = `
-                <tr>
-                    <th style="width: 15%;">6.1</th>
-                    <td>Aucun commentaire fourni.</td>
-                </tr>
-            `;
-        }
+        let commentDetailsHtml = allComments.length > 0 ? allComments.map(c => {
+            const imgs = commentImages[c.id] || [];
+            let photoHtml = imgs.length > 0 ? `
+                <div style="font-size: 14px; margin-top: 10px; margin-bottom: 5px; font-weight: bold; color: #444;">Photos associées (6.${c.number})</div>
+                <div class="p-grid" style="margin-top: 0;">
+                    ${imgs.map(src => `<img src="${src}" class="p-img">`).join('')}
+                </div>
+            ` : '';
+            return `<tr><th style="width: 15%;">6.${c.number}</th><td>${c.text}${photoHtml}</td></tr>`;
+        }).join('') : `<tr><th style="width: 15%;">6.1</th><td>Aucun commentaire fourni.</td></tr>`;
 
         var html = `
             <div class="p-header-container">
                 <img src="${CONFIG.logoUrl}" class="p-logo">
                 <div class="p-title">Pré visite des ouvrages</div>
             </div>
-            
             <div class="p-h2">1. Identification</div>
             <table>
                 <tr><th>Client</th><td>${getVal('i_client')}</td></tr>
@@ -749,7 +547,6 @@
                 <tr><th>Date</th><td>${getVal('i_date')}</td></tr>
                 <tr><th>Intervenant</th><td>${getVal('i_int')}</td></tr>
             </table>
-
             <div class="p-h2">2. Ouvrage</div>
             <table>
                 <tr><th>Type</th><td>${getVal('i_type')}</td></tr>
@@ -757,55 +554,36 @@
                 <tr><th>Identifiant</th><td>${getVal('i_id')}</td></tr>
                 <tr><th>GPS</th><td>${getVal('i_gps')}</td></tr>
             </table>
-
             <div class="p-h2">Photos Couverture</div>
-            <div class="p-grid">
-                ${images['file1'].map(src => `<img src="${src}" class="p-img">`).join('')}
-            </div>
-
+            <div class="p-grid">${images['file1'].map(src => `<img src="${src}" class="p-img">`).join('')}</div>
             <div style="page-break-before: always;"></div>
-
             <div class="p-header-container">
                 <img src="${CONFIG.logoUrl}" class="p-logo">
                 <div class="p-title">Localisation & Visite</div>
             </div>
-
             <div class="p-h2">3. Localisation (Plan)</div>
-            <div class="p-grid">
-                ${images['file3'].map(src => `<img src="${src}" class="p-img">`).join('')}
-            </div>
-
+            <div class="p-grid">${images['file3'].map(src => `<img src="${src}" class="p-img">`).join('')}</div>
             <div class="p-h2">4. Préparation</div>
             <table>
                 <tr><th>Débroussaillage</th><td>${getRadio('deb')}</td></tr>
                 <tr><th>Signalisation</th><td>${getRadio('sig')}</td></tr>
                 <tr><th>Accès</th><td>${getCheck()}</td></tr>
             </table>
-
             <div class="p-h2">5. Photos Abords</div>
-            <div class="p-grid">
-                ${images['file2'].map(src => `<img src="${src}" class="p-img">`).join('')}
-            </div>
-
+            <div class="p-grid">${images['file2'].map(src => `<img src="${src}" class="p-img">`).join('')}</div>
             <div style="page-break-before: always;"></div>
-            
             <div class="p-header-container">
                 <img src="${CONFIG.logoUrl}" class="p-logo">
                 <div class="p-title">Commentaires</div>
             </div>
-
-            <div class="p-h2">6. Commentaires et Observations (${allComments.length} entrée${allComments.length > 1 ? 's' : ''})</div>
-            <table>
-                ${commentDetailsHtml}
-            </table>
+            <div class="p-h2">6. Commentaires et Observations (${allComments.length})</div>
+            <table>${commentDetailsHtml}</table>
         `;
 
         document.getElementById('rapport-content').innerHTML = html;
-        
         document.getElementById('section-formulaire').classList.add('hidden');
         document.getElementById('section-rapport').classList.remove('hidden');
         document.getElementById('action-bar').classList.remove('hidden');
-        
         window.scrollTo(0,0);
         document.title = getVal('i_id') + " - " + getVal('i_type') + " - " + getVal('i_date');
     }
